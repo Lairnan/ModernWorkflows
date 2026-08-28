@@ -16,9 +16,8 @@ public class WaitEvent : StepBodyAsync
     public string? EventKey { get; set; }
     public string[]? EventKeys { get; set; }
     public string? EventName { get; set; }
-    public object EventData { get; set; }
-    
-    
+    public object EventData { get; set; } = null!;
+
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
         if (string.IsNullOrWhiteSpace(this.EventKey) && (this.EventKeys == null || this.EventKeys.Length < 1))

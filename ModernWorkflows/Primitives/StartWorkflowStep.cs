@@ -13,7 +13,7 @@ public class StartWorkflowStep : StepBodyAsync
     private readonly IWorkflowHostEx _workflowHost;
     private readonly IPersistenceProvider _persistenceProvider;
 
-    public string WorkflowId { get; set; }
+    public string WorkflowId { get; set; } = null!;
     public JObject? ChildInputs { get; set; }
     public JObject? ChildOutputs { get; set; }
 
