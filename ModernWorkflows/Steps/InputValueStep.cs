@@ -9,9 +9,9 @@ public class InputValueStep : StepBody
 {
     private readonly IWaitInputValue _waitInputValue;
     
-    public object OutputValue { get; set; }
+    public object OutputValue { get; set; } = null!;
 
-    public string TitleKey { get; set; }
+    public string TitleKey { get; set; } = null!;
     public int? DecimalPoint { get; set; }
     public string? InputFormat { get; set; }
 

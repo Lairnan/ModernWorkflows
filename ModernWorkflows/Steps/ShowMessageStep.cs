@@ -8,7 +8,7 @@ public class ShowMessageStep : StepBody
 {
     private readonly IMessagePresenter _presenter;
 
-    public string Message { get; set; }
+    public string Message { get; set; } = null!;
     public bool? NewLine { get; set; }
 
     public ShowMessageStep(IMessagePresenter presenter)

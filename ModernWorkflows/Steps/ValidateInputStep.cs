@@ -6,35 +6,22 @@ namespace ModernWorkflows.Steps;
 
 public class ValidateInputStep : StepBody
 {
-    public object Value { get; set; }
-    public InputValue ValueType { get; set; }
+    public object? Value { get; set; }
+    public InputValue? ValueType { get; set; }
     public string MessageError { get; set; } = "";
     
     public override ExecutionResult Run(IStepExecutionContext context)
     {
         if (Value == null || ValueType == null) return ExecutionResult.Outcome(false);
-        
-        bool outcomeExpr;
-        
-        switch (ValueType)
+
+        var outcomeExpr = ValueType switch
         {
-            case InputValue.Int:
-                outcomeExpr = Value is int;
-                break;
-            case InputValue.Double:
-                outcomeExpr = Value is double;
-                break;
-            case InputValue.Decimal:
-                outcomeExpr = Value is decimal;
-                break;
-            case InputValue.DateTime:
-                outcomeExpr = Value is DateTime;
-                break;
-            case InputValue.String:
-            default:
-                outcomeExpr = Value is string;
-                break;
-        }
+            InputValue.Int => Value is int,
+            InputValue.Double => Value is double,
+            InputValue.Decimal => Value is decimal,
+            InputValue.DateTime => Value is DateTime,
+            _ => Value is string
+        };
 
         if (!outcomeExpr)
         {
