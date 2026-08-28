@@ -1,0 +1,66 @@
+## === .NET & Visual Studio / Rider === ##
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+.vscode/
+.idea/
+*.sln.ide
+*.pidb
+*.svd
+
+## === Logs & local configs === ##
+*.log
+*.tlog
+*.dbmdl
+*.bak
+*.orig
+*.DotSettings.user
+*.csproj.user
+
+## === NuGet / packages === ##
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## === Runtime files === ##
+*.db
+*.sqlite
+*.db-wal
+*.db-shm
+*.db-journal
+*.cache
+*.pdb
+
+## === Build system === ##
+build/
+publish/
+dist/
+release/
+Release/
+Debug/
+*.publish.xml
+
+## === Rider specific === ##
+.idea/
+*.iml
+*.sln.iml
+
+## === Docker (если будешь использовать) === ##
+docker-compose.override.yml
+.env
+.env.local
+
+## === System === ##
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+## === Custom === #
+Plugins/ProxyService/proxies.json
