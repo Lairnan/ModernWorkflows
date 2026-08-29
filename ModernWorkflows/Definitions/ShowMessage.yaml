@@ -1,8 +1,8 @@
 Id: ShowMessage
 Version: 1
-DataType: SmartReminder.Workflows.Contexts.ShowMessageContext, SmartReminder.Workflows
+DataType: ModernWorkflows.Workflows.Contexts.ShowMessageContext, ModernWorkflows.Workflows
 Steps:
   - Id: ShowMessageStep
-    StepType: SmartReminder.Workflows.Steps.ShowMessageStep, SmartReminder.Workflows
+    StepType: ModernWorkflows.Workflows.Steps.ShowMessageStep, ModernWorkflows.Workflows
     Inputs:
       Message: data.Message

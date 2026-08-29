@@ -1,9 +1,9 @@
 Id: WaitInputValue
 Version: 1
-DataType: SmartReminder.Workflows.Contexts.InputValueContext, SmartReminder.Workflows
+DataType: ModernWorkflows.Workflows.Contexts.InputValueContext, ModernWorkflows.Workflows
 Steps:
   - Id: InputValueStep
-    StepType: SmartReminder.Workflows.Steps.InputValueStep, SmartReminder.Workflows
+    StepType: ModernWorkflows.Workflows.Steps.InputValueStep, ModernWorkflows.Workflows
     Inputs:
       TitleKey: data.TitleKey
       DecimalPoint: data.DecimalPoint
@@ -14,7 +14,7 @@ Steps:
     NextStepId: ValidateInputStep
     
   - Id: ValidateInputStep
-    StepType: SmartReminder.Workflows.Steps.ValidateInputStep, SmartReminder.Workflows
+    StepType: ModernWorkflows.Workflows.Steps.ValidateInputStep, ModernWorkflows.Workflows
     Inputs:
       Value: data.Value
       ValueType: data.InputValueType
@@ -25,7 +25,7 @@ Steps:
       FinishWorkflow: 'true'
     
   - Id: ShowMessage
-    StepType: SmartReminder.Workflows.Primitives.StartWorkflowStep, SmartReminder.Workflows
+    StepType: ModernWorkflows.Workflows.Primitives.StartWorkflowStep, ModernWorkflows.Workflows
     Inputs:
       WorkflowId: '"ShowMessage"'
       ChildInputs:

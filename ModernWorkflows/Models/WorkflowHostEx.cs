@@ -114,7 +114,7 @@ public class WorkflowHostEx(
             var primaryWorkflowId = configuration.GetValue<string>("PrimaryWorkflowId");
             if (string.IsNullOrWhiteSpace(primaryWorkflowId))
             {
-                primaryWorkflowIds = configuration.GetValue<string[]>("PrimaryWorkflowId") ?? ["StartReminder"];
+                primaryWorkflowIds = configuration.GetValue<string[]>("PrimaryWorkflowId") ?? ["ModernWorkflows"];
             }
             else
             {
@@ -127,12 +127,12 @@ public class WorkflowHostEx(
 
     public async Task PublishEvent(string eventKey, object eventData)
     {
-        await workflowEventPublisher.PublishEvent("SmartReminder.Event", eventKey, eventData);
+        await workflowEventPublisher.PublishEvent("ModernWorkflows.Event", eventKey, eventData);
     }
 
     public async Task PublishEvent(string eventName, string eventKey, object eventData)
     {
-        if (string.IsNullOrWhiteSpace(eventName)) eventName = "SmartReminder.Event";
+        if (string.IsNullOrWhiteSpace(eventName)) eventName = "ModernWorkflows.Event";
         await workflowEventPublisher.PublishEvent(eventName, eventKey, eventData);
     }
 

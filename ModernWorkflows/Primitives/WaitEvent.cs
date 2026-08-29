@@ -24,7 +24,7 @@ public class WaitEvent : StepBodyAsync
             throw new ArgumentException("Event key or keys cannot be empty");
         
         if (string.IsNullOrWhiteSpace(this.EventName))
-            this.EventName = "SmartReminder.Event";
+            this.EventName = "ModernWorkflows.Event";
 
         var eventParameters = string.IsNullOrWhiteSpace(this.EventKey) ? this.EventKeys! : [this.EventKey];
         this.EventData = await _workflowEventPublisher.WaitEvent(this.EventName, eventParameters);
