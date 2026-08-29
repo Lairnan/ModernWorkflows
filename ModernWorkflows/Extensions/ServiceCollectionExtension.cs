@@ -4,13 +4,26 @@ using ModernWorkflows.Models;
 using ModernWorkflows.Primitives;
 using ModernWorkflows.Steps;
 using WorkflowCore.Interface;
+using WorkflowCore.Models;
 
 namespace ModernWorkflows.Extensions;
 
 public static class ServiceCollectionExtension
 {
-    public static IServiceCollection AddModernWorkflows(this IServiceCollection services)
+    /// <summary>
+    /// Add base workflow, workflowDSL and updated configurations
+    /// </summary>
+    /// <param name="services">Service collection from DI</param>
+    /// <param name="setupAction">Setup action for standard AddWorkflow</param>
+    /// <returns>Service collection from DI with updated workflows</returns>
+    public static IServiceCollection AddModernWorkflows(
+        this IServiceCollection services,
+        Action<WorkflowOptions>? setupAction = null
+    )
     {
+        services.AddWorkflow(setupAction);
+        services.AddWorkflowDSL();
+        
         services.AddTransient<StartWorkflowStep>();
         services.AddTransient<InitializeWorkflowStep>();
         services.AddTransient<ShowMessageStep>();

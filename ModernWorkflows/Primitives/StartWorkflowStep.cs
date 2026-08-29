@@ -7,33 +7,21 @@ using WorkflowCore.Models;
 
 namespace ModernWorkflows.Primitives;
 
-public class StartWorkflowStep : StepBodyAsync
+public class StartWorkflowStep(ILogger<StartWorkflowStep> logger, IWorkflowHostEx workflowHost) : StepBodyAsync
 {
-    private readonly ILogger<StartWorkflowStep> _logger;
-    private readonly IWorkflowHostEx _workflowHost;
-    private readonly IPersistenceProvider _persistenceProvider;
-
     public string WorkflowId { get; set; } = null!;
     public JObject? ChildInputs { get; set; }
     public JObject? ChildOutputs { get; set; }
-
-    public StartWorkflowStep(ILogger<StartWorkflowStep> logger, IWorkflowHostEx workflowHost, IPersistenceProvider persistenceProvider)
-    {
-        _logger = logger;
-        _workflowHost = workflowHost;
-        _persistenceProvider = persistenceProvider;
-    }
     
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
-        var definition = _workflowHost.Registry.GetDefinition(WorkflowId);
+        var definition = workflowHost.Registry.GetDefinition(WorkflowId);
         var childDataType = definition.DataType;
         var inputData = ChildInputs != null ? GetInputData(context, childDataType, ChildInputs) : new JObject().ToObject(childDataType);
         
-        _logger.LogDebug("StartWorkflowStep id: {workflowId} with dataType: {dataType} and data: {@data}", WorkflowId, childDataType.FullName, inputData);
+        logger.LogDebug("StartWorkflowStep id: {workflowId} with dataType: {dataType} and data: {@data}", WorkflowId, childDataType.FullName, inputData);
 
-        var childWorkflowId = await _workflowHost.StartWorkflow(WorkflowId, inputData);
-        var completedWorkflow = await _workflowHost.AwaitCompleteWorkflow(childWorkflowId);
+        var completedWorkflow = await workflowHost.StartWorkflowAndAwaitAsync(WorkflowId, inputData);
         
         if (ChildOutputs != null)
             SetChildOutputs(context, completedWorkflow.Data, ChildOutputs);
@@ -41,7 +29,7 @@ public class StartWorkflowStep : StepBodyAsync
         return ExecutionResult.Next();
     }
 
-    private object GetInputData(IStepExecutionContext parentContext, Type childDataType, JObject childInputs)
+    private object? GetInputData(IStepExecutionContext parentContext, Type childDataType, JObject childInputs)
     {
         var resolvedInputs = new JObject();
 
@@ -64,11 +52,11 @@ public class StartWorkflowStep : StepBodyAsync
         }
     }
 
-    private object ResolveValue(JToken token, IStepExecutionContext context)
+    private object? ResolveValue(JToken token, IStepExecutionContext context)
     {
         if (token.Type == JTokenType.String)
         {
-            var tokenValue = token.Value<string>();
+            var tokenValue = token.Value<string>()!;
 
             return IsQuotedString(tokenValue)
                 ? Unquote(tokenValue)
@@ -88,7 +76,7 @@ public class StartWorkflowStep : StepBodyAsync
         return input.Trim('"');
     }
 
-    private object ResolveExpression(string expression, object data, string contextDataStart)
+    private object? ResolveExpression(string expression, object data, string contextDataStart)
     {
         var contextDataStartWithDot = contextDataStart + ".";
         if (expression.StartsWith(contextDataStartWithDot))
@@ -114,7 +102,7 @@ public class StartWorkflowStep : StepBodyAsync
         }
     }
     
-    private object GetPropertyValue(object obj, string propertyName)
+    private object? GetPropertyValue(object obj, string propertyName)
     {
         return IsQuotedString(propertyName)
             ? Unquote(propertyName)

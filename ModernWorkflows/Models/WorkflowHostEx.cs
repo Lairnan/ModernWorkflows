@@ -31,30 +31,40 @@ public class WorkflowHostEx(
         IWorkflowHostEx
 {
     private string[]? _primaryWorkflowIds;
+
+    public async Task<WorkflowInstance> StartWorkflowAndAwaitAsync(string workflowId, object? data = null,
+        string? reference = null)
+    {
+        var childWorkflowId = await StartWorkflow(workflowId, data, reference);
+        return await AwaitCompleteWorkflow(childWorkflowId);
+    }
     
     public async Task<WorkflowInstance> AwaitCompleteWorkflow(string instanceId)
     {
-        var runnableInstances = await this.PersistenceStore.GetRunnableInstances(DateTime.Now);
-        if (runnableInstances == null || runnableInstances.All(s => s != instanceId)) return await this.PersistenceStore.GetWorkflowInstance(instanceId);
+        var runnableInstances = await PersistenceStore.GetRunnableInstances(DateTime.Now);
+        if (runnableInstances == null || runnableInstances.All(s => s != instanceId))
+            return await PersistenceStore.GetWorkflowInstance(instanceId);
         
         var tcs = new TaskCompletionSource<bool>();
+        OnLifeCycleEvent += Handler;
+        await tcs.Task;
+        var completedWorkflow = await PersistenceStore.GetWorkflowInstance(instanceId);
+        return completedWorkflow;
+
         void Handler(LifeCycleEvent evt)
         {
-            if (evt is WorkflowCompleted wc && wc.WorkflowInstanceId == instanceId)
+            switch (evt)
             {
-                tcs.SetResult(true);
-                this.OnLifeCycleEvent -= Handler;
-            }
-            else if (evt is WorkflowTerminated wt && wt.WorkflowInstanceId == instanceId)
-            {
-                tcs.SetException(new Exception("Child workflow terminated"));
-                this.OnLifeCycleEvent -= Handler;
+                case WorkflowCompleted wc when wc.WorkflowInstanceId == instanceId:
+                    tcs.SetResult(true);
+                    OnLifeCycleEvent -= Handler;
+                    break;
+                case WorkflowTerminated wt when wt.WorkflowInstanceId == instanceId:
+                    tcs.SetException(new Exception("Child workflow terminated"));
+                    OnLifeCycleEvent -= Handler;
+                    break;
             }
         }
-        this.OnLifeCycleEvent += Handler;
-        await tcs.Task;
-        var completedWorkflow = await this.PersistenceStore.GetWorkflowInstance(instanceId);
-        return completedWorkflow;
     }
 
     public async Task<IEnumerable<WorkflowInstance>> AwaitCompleteWorkflows(string[] instanceIds)
@@ -62,22 +72,28 @@ public class WorkflowHostEx(
         var instanceIdsCompleted = new HashSet<string>();
         var instanceIdsTerminated = new HashSet<string>();
         var instanceIdsRunning = new HashSet<string>(instanceIds);
-        var runnableInstances = await this.PersistenceStore.GetRunnableInstances(DateTime.Now);
+        var runnableInstances = await PersistenceStore.GetRunnableInstances(DateTime.Now);
         if (runnableInstances == null || runnableInstances.All(s => !instanceIds.Contains(s)))
-            return await this.PersistenceStore.GetWorkflowInstances(instanceIds);
+            return await PersistenceStore.GetWorkflowInstances(instanceIds);
         
         var tcs = new TaskCompletionSource<bool>();
+        OnLifeCycleEvent += Handler;
+        await tcs.Task;
+        var completedWorkflows = await PersistenceStore.GetWorkflowInstances(instanceIdsCompleted);
+        return completedWorkflows;
+
         void Handler(LifeCycleEvent evt)
         {
-            if (evt is WorkflowCompleted wc && instanceIds.Contains(wc.WorkflowInstanceId))
+            switch (evt)
             {
-                instanceIdsCompleted.Add(wc.WorkflowInstanceId);
-                instanceIdsRunning.Remove(wc.WorkflowInstanceId);
-            }
-            else if (evt is WorkflowTerminated wt && instanceIds.Contains(wt.WorkflowInstanceId))
-            {
-                instanceIdsTerminated.Add(wt.WorkflowInstanceId);
-                instanceIdsRunning.Remove(wt.WorkflowInstanceId);
+                case WorkflowCompleted wc when instanceIds.Contains(wc.WorkflowInstanceId):
+                    instanceIdsCompleted.Add(wc.WorkflowInstanceId);
+                    instanceIdsRunning.Remove(wc.WorkflowInstanceId);
+                    break;
+                case WorkflowTerminated wt when instanceIds.Contains(wt.WorkflowInstanceId):
+                    instanceIdsTerminated.Add(wt.WorkflowInstanceId);
+                    instanceIdsRunning.Remove(wt.WorkflowInstanceId);
+                    break;
             }
 
             if (instanceIdsRunning.Count == 0)
@@ -86,13 +102,9 @@ public class WorkflowHostEx(
                     tcs.SetResult(true);
                 else
                     tcs.SetException(new Exception("Child workflow terminated"));
-                this.OnLifeCycleEvent -= Handler;
+                OnLifeCycleEvent -= Handler;
             }
         }
-        this.OnLifeCycleEvent += Handler;
-        await tcs.Task;
-        var completedWorkflows = await this.PersistenceStore.GetWorkflowInstances(instanceIdsCompleted);
-        return completedWorkflows;
     }
 
     public void LoadDefinitions(IDefinitionLoader loader)
@@ -136,7 +148,11 @@ public class WorkflowHostEx(
         await workflowEventPublisher.PublishEvent(eventName, eventKey, eventData);
     }
 
-    private void LoadFilesDefinitions(IDefinitionLoader loader, IEnumerable<string> filesPath, Func<string, DefinitionSourceV1> deserializer)
+    private static void LoadFilesDefinitions(
+        IDefinitionLoader loader,
+        IEnumerable<string> filesPath,
+        Func<string, DefinitionSourceV1> deserializer
+    )
     {
         foreach (var path in filesPath)
         {

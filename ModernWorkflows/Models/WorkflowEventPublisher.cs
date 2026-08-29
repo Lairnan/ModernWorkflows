@@ -60,6 +60,11 @@ public class WorkflowEventPublisher : IWorkflowEventPublisher
     {
         _logger.LogDebug("Waiting event {eventName}, with eventKeys: {@eventKeys}", eventName, eventKeys);
         var tcs = new TaskCompletionSource<object>();
+        WorkflowEvent += Handler;
+        WorkflowWaitEventStart.Invoke(eventName);
+        var eventData = await tcs.Task;
+        return eventData;
+
         void Handler(ExecutionPointer evt)
         {
             var evtKey = evt.EventKey;
@@ -67,12 +72,8 @@ public class WorkflowEventPublisher : IWorkflowEventPublisher
             {
                 tcs.SetResult(evt.EventData);
                 _logger.LogDebug("Event {eventName} - {eventKey} handled", evt.EventName, evt.EventKey);
-                this.WorkflowEvent -= Handler;
+                WorkflowEvent -= Handler;
             }
         }
-        this.WorkflowEvent += Handler;
-        WorkflowWaitEventStart.Invoke(eventName);
-        var eventData = await tcs.Task;
-        return eventData;
     }
 }
