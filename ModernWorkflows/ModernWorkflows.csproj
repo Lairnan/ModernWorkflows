@@ -12,7 +12,7 @@
         <Description>Extensions and abstractions for WorkflowCore, including input/output presenters and extended host capabilities.</Description>
         <RepositoryUrl>https://github.com/lairnan/ModernWorkflows</RepositoryUrl>
         <PackageTags>workflowcore;workflows;dotnet8</PackageTags>
-        <PackageLicenseExpression>Apache</PackageLicenseExpression>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
 
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
