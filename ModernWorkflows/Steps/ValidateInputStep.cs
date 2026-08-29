@@ -12,7 +12,11 @@ public class ValidateInputStep : StepBody
     
     public override ExecutionResult Run(IStepExecutionContext context)
     {
-        if (Value == null || ValueType == null) return ExecutionResult.Outcome(false);
+        if (Value == null || ValueType == null)
+        {
+            MessageError = "Value is required";
+            return ExecutionResult.Outcome(false);
+        }
 
         var outcomeExpr = ValueType switch
         {
