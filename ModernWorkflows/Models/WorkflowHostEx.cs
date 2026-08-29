@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using ModernWorkflows.Contexts;
+using ModernWorkflows.Definitions;
 using ModernWorkflows.Interfaces;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -16,7 +18,6 @@ public class WorkflowHostEx(
     WorkflowOptions options,
     ILoggerFactory loggerFactory,
     IServiceProvider serviceProvider,
-    IConfiguration configuration,
     IWorkflowRegistry registry,
     IDistributedLockProvider lockProvider,
     IEnumerable<IBackgroundTask> backgroundTasks,
@@ -30,8 +31,25 @@ public class WorkflowHostEx(
         searchIndex, activityController),
         IWorkflowHostEx
 {
-    private string[]? _primaryWorkflowIds;
-
+    public new void Start()
+    {
+        if (!Registry.IsRegistered(ShowMessageWorkflow.WorkflowId, ShowMessageWorkflow.WorkflowVersion))
+            RegisterWorkflow<ShowMessageWorkflow, ShowMessageContext>();
+        if (!Registry.IsRegistered(WaitInputValueWorkflow.WorkflowId, WaitInputValueWorkflow.WorkflowVersion))
+            RegisterWorkflow<WaitInputValueWorkflow, InputValueContext>();
+        base.Start();
+    }
+    
+    public new Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (!Registry.IsRegistered(ShowMessageWorkflow.WorkflowId, ShowMessageWorkflow.WorkflowVersion))
+            RegisterWorkflow<ShowMessageWorkflow, ShowMessageContext>();
+        if (!Registry.IsRegistered(WaitInputValueWorkflow.WorkflowId, WaitInputValueWorkflow.WorkflowVersion))
+            RegisterWorkflow<WaitInputValueWorkflow, InputValueContext>();
+        
+        return base.StartAsync(cancellationToken);
+    }
+    
     public async Task<WorkflowInstance> StartWorkflowAndAwaitAsync(string workflowId, object? data = null,
         string? reference = null)
     {
@@ -116,25 +134,6 @@ public class WorkflowHostEx(
         
         LoadFilesDefinitions(loader, yamlFiles, Deserializers.Yaml);
         LoadFilesDefinitions(loader, jsonFiles, Deserializers.Json);
-    }
-
-    public string[] GetPrimaryWorkflowId()
-    {
-        if (_primaryWorkflowIds == null)
-        {
-            string[] primaryWorkflowIds;
-            var primaryWorkflowId = configuration.GetValue<string>("PrimaryWorkflowId");
-            if (string.IsNullOrWhiteSpace(primaryWorkflowId))
-            {
-                primaryWorkflowIds = configuration.GetValue<string[]>("PrimaryWorkflowId") ?? ["ModernWorkflows"];
-            }
-            else
-            {
-                primaryWorkflowIds = [primaryWorkflowId];
-            }
-            _primaryWorkflowIds = primaryWorkflowIds;
-        }
-        return _primaryWorkflowIds;
     }
 
     public async Task PublishEvent(string eventKey, object eventData)

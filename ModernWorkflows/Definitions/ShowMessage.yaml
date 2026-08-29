@@ -1,8 +1,0 @@
-Id: ShowMessage
-Version: 1
-DataType: ModernWorkflows.Workflows.Contexts.ShowMessageContext, ModernWorkflows.Workflows
-Steps:
-  - Id: ShowMessageStep
-    StepType: ModernWorkflows.Workflows.Steps.ShowMessageStep, ModernWorkflows.Workflows
-    Inputs:
-      Message: data.Message

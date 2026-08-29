@@ -9,7 +9,6 @@ public interface IWorkflowHostEx : IWorkflowHost
     Task<WorkflowInstance> AwaitCompleteWorkflow(string instanceId);
     Task<IEnumerable<WorkflowInstance>> AwaitCompleteWorkflows(string[] instanceIds);
     void LoadDefinitions(IDefinitionLoader loader);
-    string[] GetPrimaryWorkflowId();
     Task PublishEvent(string eventKey, object eventData);
     Task PublishEvent(string eventName, string eventKey, object eventData);
 }

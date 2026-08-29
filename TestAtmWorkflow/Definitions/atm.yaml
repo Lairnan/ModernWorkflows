@@ -1,0 +1,40 @@
+Id: AtmWorkflow
+Version: 1
+DataType: TestAtmWorkflow.Contexts.AtmWorkflowContext, TestAtmWorkflow
+Steps:
+  - Id: Insert
+    StepType: TestAtmWorkflow.Steps.InsertCardStep, TestAtmWorkflow
+    NextStepId: Pin
+  - Id: Pin
+    StepType: ModernWorkflows.Primitives.StartWorkflowStep, ModernWorkflows
+    Inputs:
+      WorkflowId: '"WaitInputValue"'
+      ChildInputs:
+        TitleKey: '"Введите пин-код: "'
+        InputValueType: 1
+      ChildOutputs:
+        Pin: step.Value
+    NextStepId: ValidatePin
+  - Id: ValidatePin
+    StepType: TestAtmWorkflow.Steps.ValidatePinStep, TestAtmWorkflow
+    Inputs:
+      Pin: data.Pin
+    Outputs:
+      IsValid: step.IsValid
+    NextStepId: ValidateInput
+  - Id: ValidateInput
+    StepType: WorkflowCore.Primitives.Decide, WorkflowCore
+    Inputs:
+      Expression: data.IsValid
+    SelectNextStep:
+      Withdraw: 'data.IsValid'
+      End: '!data.IsValid'
+  - Id: Withdraw
+    StepType: TestAtmWorkflow.Steps.WithdrawCashStep, TestAtmWorkflow
+    NextStepId: End
+  - Id: End
+    StepType: ModernWorkflows.Primitives.StartWorkflowStep, ModernWorkflows
+    Inputs:
+      WorkflowId: '"ShowMessage"'
+      ChildInputs:
+        Message: '"Завершено"'
