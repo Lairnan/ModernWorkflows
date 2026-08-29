@@ -7,8 +7,10 @@
 
         <PackageId>ModernWorkflows</PackageId>
         <Version>1.0.0</Version>
+        <Title>ModernWorkflows</Title>
         <Authors>Lairnan</Authors>
         <Company>Lairnan</Company>
+        <Copyright>© Lairnan</Copyright>
         <Description>Extensions and abstractions for WorkflowCore, including input/output presenters and extended host capabilities.</Description>
         <RepositoryUrl>https://github.com/lairnan/ModernWorkflows</RepositoryUrl>
         <PackageTags>workflowcore;workflows;dotnet8</PackageTags>
